@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEY XII-27 CPCCFyVF</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        nav {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .nav-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .nav-button:hover, .nav-button.active {
+            background-color: #0056b3;
+        }
+        .module-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        iframe {
+            width: 100%;
+            height: 70vh; /* Usa un porcentaje de la altura de la ventana */
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <header>
+            <h3>CODIGO PROCESAL CIVIL, COMERCIAL, DE FAMILIA Y VIOLENCIA FAMILIAR DE LA PROVINCIA DE MISIONES LEY XII-27</h3>
+            <p>Sistema Interactivo de Busqueda de palabras dentro de la Ley y Texto completo</p>
+        </header>
+
+        <nav id="navigation">
+            </nav>
+
+        <main>
+            <div class="module-container">
+                <iframe id="content-frame" src="" title="Contenedor de contenido"></iframe>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Array con la información de los libros
+        const libros = [
+            { id: 1, url: 'https://raw.githack.com/AdminDefensoria6/web/b2532538fa2e670c7a8d822008acc91e03fc0c1d/1.html' },
+            { id: 2, url: 'https://raw.githack.com/AdminDefensoria6/web/b2532538fa2e670c7a8d822008acc91e03fc0c1d/2.html' },
+            { id: 3, url: 'https://raw.githack.com/AdminDefensoria6/web/b2532538fa2e670c7a8d822008acc91e03fc0c1d/3.html' },
+            { id: 4, url: 'https://raw.githack.com/AdminDefensoria6/web/b2532538fa2e670c7a8d822008acc91e03fc0c1d/4.html' },
+            { id: 5, url: 'https://raw.githack.com/AdminDefensoria6/web/b2532538fa2e670c7a8d822008acc91e03fc0c1d/5.html' },
+            { id: 6, url: 'https://raw.githack.com/AdminDefensoria6/web/b2532538fa2e670c7a8d822008acc91e03fc0c1d/6.html' },
+            { id: 7, url: 'https://raw.githack.com/AdminDefensoria6/web/b2532538fa2e670c7a8d822008acc91e03fc0c1d/7.html' },
+            { id: 8, url: 'https://raw.githack.com/AdminDefensoria6/web/b2532538fa2e670c7a8d822008acc91e03fc0c1d/8.html' },
+            { id: 9, url: 'https://raw.githack.com/AdminDefensoria6/web/b2532538fa2e670c7a8d822008acc91e03fc0c1d/9.html' },
+            { id: 'Texto completo', url: 'https://digestomisiones.gob.ar/archivospdf/1688596715_LEY%20XII%20-%20N%2027.pdf' }
+        ];
+
+        // Elementos del DOM
+        const navigation = document.getElementById('navigation');
+        const contentFrame = document.getElementById('content-frame');
+        let active_button = null;
+
+        // Función para cambiar el contenido del iframe
+        function cargarLibro(url, button_element) {
+            contentFrame.src = url;
+            if (active_button) {
+                active_button.classList.remove('active');
+            }
+            button_element.classList.add('active');
+            active_button = button_element;
+        }
+
+        // Crear botones de navegación dinámicamente
+        libros.forEach(libro => {
+            const button = document.createElement('button');
+            button.className = 'nav-button';
+            button.textContent = `Libro ${libro.id}`;
+            // Use a conditional to set the button's text for the new URL
+            if (libro.id === 'Texto completo') {
+                button.textContent = libro.id;
+            }
+            button.onclick = () => cargarLibro(libro.url, button);
+            navigation.appendChild(button);
+        });
+
+        // Cargar el primer libro por defecto al abrir la página
+        if (libros.length > 0) {
+            const firstButton = navigation.querySelector('.nav-button');
+            cargarLibro(libros[0].url, firstButton);
+        }
+    </script>
+
+</body>
+</html>
