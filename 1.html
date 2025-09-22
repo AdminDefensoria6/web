@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Filtro y Print - LIBRO-1</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:#eaf3ff;
+      color:#083759;
+      display:flex;
+      justify-content:center;
+      padding:20px;
+    }
+    .app{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      max-width:900px;
+      width:100%;
+      box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .search{
+      padding:8px;
+      border:1px solid #1565C0;
+      border-radius:8px;
+      width:260px;
+    }
+    .btn{
+      background:#1565C0;
+      border:0;
+      color:white;
+      padding:8px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    .list{
+      display:grid;
+      gap:12px;
+    }
+    .item{
+      padding:12px;
+      border:1px solid #d0e5ff;
+      border-radius:8px;
+      background:#f9fcff;
+    }
+    .empty{color:#777;text-align:center;margin-top:20px}
+    @media print {
+      header, .btn, .search { display:none }
+      body{background:white}
+      .app{box-shadow:none;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <input id="filterInput" class="search" placeholder="Buscar en el documento..." />
+      <button class="btn" onclick="window.print()">Imprimir</button>
+    </header>
+    <main>
+      <div id="list" class="list"></div>
+      <div id="empty" class="empty" style="display:none">No se encontraron resultados.</div>
+    </main>
+  </div>
+
+  <script>
+    // Contenido REAL del PDF (texto plano concatenado)
+    const PDF_TEXT = `
+PARTE GENERAL LIBRO PRIMERO - DISPOSICIONES GENERALES
+TITULO ORGANO JUDICIAL
+CAPITULO I COMPETENCIA
+ARTICULO 1.- Caracter.
+ARTICULO 2.- Prorroga Expresa o Tacita.
+ARTICULO 3.- Indelegabilidad.
+ARTICULO 4.- Declaracion de Incompetencia.
+ARTICULO 5.- Reglas Generales.
+ARTICULO 6.- Reglas Especiales.
+CAPITULO II CUESTIONES DE COMPETENCIA
+ARTICULO 7.- Procedencia.
+ARTICULO 8.- Declinatoria e Inhibitoria.
+ARTICULO 9.- Planteamiento y Decision de la Inhibitoria.
+ARTICULO 10.- Tramite de la Inhibitoria ante el Juez Requerido.
+ARTICULO 11.- Tramite de la Inhibitoria ante el Tribunal Superior.
+ARTICULO 12.- Sustanciacion.
+ARTICULO 13.- Contienda Negativa y Conocimiento Simultaneo.
+CAPITULO III RECUSACIONES Y EXCUSACIONES
+ARTICULO 14.- Recusacion sin Expresion de Causa. 
+ARTICULO 18.- Oportunidad. 
+ARTICULO 19.- Tribunal Competente para Conocer de la Recusacion. 
+ARTICULO 20.- Forma de Deducirla. 
+ARTICULO 21.- Rechazo "In Limine". 
+ARTICULO 22.- Informe del Magistrado Recusado. 
+ARTICULO 23.- Consecuencia del Contenido del Informe.
+ARTICULO 24.- Apertura a Prueba. 
+ARTICULO 25.- Resolucion. 
+ARTICULO 26.- Informe de los Jueces de Primera Instancia. 
+ARTICULO 27.- Tramite de la Recusacion de los Jueces de Primera Instancia.
+ARTICULO 28.- Efectos.
+ARTICULO 29.- Recusacion Maliciosa. 
+ARTICULO 30.- Excusacion. 
+ARTICULO 31.- Oposicion y Efectos. 
+ARTICULO 32.- Falta de Excusacion. 
+ARTICULO 33.- Ministerio Publico. Los funcionarios del Ministerio Publico no pueden ser recusados. 
+CAPITULO IV DEBERES Y FACULTADES DE LOS JUECES
+ARTICULO 34.- Deberes.
+ARTICULO 35.- Facultades Disciplinarias.
+ARTICULO 36.- Facultades Ordenatorias e Instructorias.
+ARTICULO 37.- Sanciones Conminatorias. 
+CAPITULO V SECRETARIOS, OFICIALES PRIMEROS
+ARTICULO 38.- Deberes.
+ARTICULO 39.- Recusacion.
+TITULO II
+PARTES CAPITULO I REGLAS GENERALES
+ARTICULO 40.- Domicilio Procesal.
+ARTICULO 41.- Falta de Constitucion y de Denuncia de Domicilio. 
+ARTICULO 42.- Subsistencia de los Domicilios. 
+ARTICULO 43.- Muerte o Incapacidad. 
+ARTICULO 44.- Sustitucion de Parte.
+ARTICULO 45.- Temeridad o Malicia. 
+CAPITULO II REPRESENTACION PROCESAL
+ARTICULO 46.- Justificacion de la Personeria. 
+ARTICULO 47.- Presentacion de Poderes.
+ARTICULO 48.- Gestor. 
+ARTICULO 49.- Efectos de la Presentacion del Poder y Admision de la Personeria. 
+ARTICULO 50.- Obligaciones del Apoderado. 
+ARTICULO 51.- Alcance del Poder.
+ARTICULO 52.- Responsabilidad por las Costas. 
+ARTICULO 53.- Cesacion de la Representacion.
+ARTICULO 54.- Unificacion de la Personeria.
+ARTICULO 55.- Revocacion. 
+CAPITULO III PATROCINIO LETRADO
+ARTICULO 56.- Patrocinio Obligatorio. 
+ARTICULO 57.- Falta de Firma del Letrado. 
+ARTICULO 58.- Dignidad. 
+CAPITULO IV REBELDIA
+ARTICULO 59.- Rebeldia. 
+ARTICULO 60.- Efectos. 
+ARTICULO 61.- Prueba. 
+ARTICULO 62.- Notificacion de la Sentencia.
+ARTICULO 63.- Medidas Precautorias. 
+ARTICULO 64.- Comparecencia del Rebelde. 
+ARTICULO 65.- Subsistencia de las Medidas Precautorias. 
+ARTICULO 66.- Prueba en Segunda Instancia. 
+ARTICULO 67.- Inimpugnabilidad de la Sentencia.
+CAPITULO V COSTAS
+ARTICULO 68.- Principio General.
+ARTICULO 69.- Incidentes. 
+ARTICULO 70.- Allanamiento.
+ARTICULO 71.- Vencimiento Parcial y Mutuo. 
+ARTICULO 72.- Pluspeticion Inexcusable. 
+ARTICULO 73.- Transaccion. Conciliacion. Desistimiento. Caducidad de Instancia.
+ARTICULO 74.- Nulidad. 
+ARTICULO 75.- Litisconsorcio.
+ARTICULO 76.- Prescripcion.
+ARTICULO 77.- Alcance de la Condena en Costas.
+CAPITULO VI BENEFICIO DE LITIGAR SIN GASTOS
+ARTICULO 78.- Procedencia. 
+ARTICULO 79.- Requisitos de la Solicitud. 
+ARTICULO 80.- Prueba. 
+ARTICULO 81.- Traslado y Resolucion.
+ARTICULO 82.- Caracter de la Resolucion.
+ARTICULO 83.- Beneficio Provisional. Efectos del Pedido. 
+ARTICULO 84.- Alcance.
+ARTICULO 85.- Defensa del Beneficiario.
+ARTICULO 86.- Extension a Otra Parte. 
+CAPITULO VII ACUMULACION DE ACCIONES Y LITICONSORCIO
+ARTICULO 87.- Acumulacion objetiva de acciones.
+ARTICULO 88.- Litisconsorcio Facultativo. 
+ARTICULO 89.- Litisconsorcio Necesario. 
+CAPITULO VIII INTERVENCION DE TERCEROS
+ARTICULO 90.- Intervencion Voluntaria. 
+ARTICULO 91.- Calidad Procesal de los Intervinientes. 
+ARTICULO 92.- Procedimiento Previo. 
+ARTICULO 93.- Efectos. 
+ARTICULO 94.- Intervencion Obligada. 
+ARTICULO 95.- Efecto de la Citacion. 
+ARTICULO 96.- Recursos. Alcance de la Sentencia.
+CAPITULO IX TERCERIAS
+ARTICULO 97.- Fundamento y Oportunidad. 
+ARTICULO 98.- Admisibilidad. Requisitos. Reiteracion. 
+ARTICULO 99.- Efectos Sobre el Principal de la Terceria de Dominio. 
+ARTICULO 100.- Efectos Sobre el Principal de la Terceria de Mejor Derecho. 
+ARTICULO 101.- Demanda. Sustanciacion. Allanamiento. 
+ARTICULO 102.- Ampliacion o Mejora del Embargo. 
+ARTICULO 103.- Connivencia entre Tercerista y Embargado. 
+ARTICULO 104.- Levantamiento del Embargo sin Terceria. 
+CAPITULO X CITACION DE EVICCION
+ARTICULO 105.- Oportunidad. 
+ARTICULO 106.- Notificacion. 
+ARTICULO 107.- Efectos.
+ARTICULO 108.- Abstencion y Tardanza del Citado. 
+ARTICULO 109.- Defensa por el Citado. 
+ARTICULO 110.- Citacion de otros Causantes. 
+CAPITULO XI ACCION SUBROGATORIA
+ARTICULO 111.- Procedencia. 
+ARTICULO 112.- Citacion. 
+ARTICULO 113.- Intervencion del Deudor.
+ARTICULO 114.- Efectos de la Sentencia.
+TITULO III ACTOS PROCESALES
+CAPITULO I ACTUACIONES EN GENERAL
+ARTICULO 115.- Idioma. Designacion de Interprete. 
+ARTICULO 116.- Informe o Certificado Previo.
+ARTICULO 117.- Anotacion de Peticiones.
+CAPITULO II ESCRITOS
+ARTICULO 118.- Redaccion. 
+ARTICULO 119.- Firma Digital. 
+ARTICULO 120.- Escrito Firmado a Ruego.
+ARTICULO 121.- Copias. 
+ARTICULO 122.- Copia de Documentos de Reproduccion Dificultosa. 
+ARTICULO 123.- Expedientes Administrativos. 
+ARTICULO 124.- Documentos en Idioma Extranjero. 
+ARTICULO 125.- Cargo. 
+CAPITULO III AUDIENCIAS
+ARTICULO 126.- Reglas Generales. 
+ARTICULO 127.- Version Taquigrafica e Impresion Fonografica.
+CAPITULO IV EXPEDIENTES
+ARTICULO 128.- Prestamo. 
+ARTICULO 129.- Devolucion. 
+ARTICULO 130.- Procedimiento de Reconstruccion. 
+ARTICULO 131.- Sanciones. 
+CAPITULO V OFICIOS Y EXHORTOS
+ARTICULO 132.- Oficios y Exhortos Dirigidos a Jueces de la Republica. 
+ARTICULO 133.- Comunicaciones a Autoridades Judiciales Extranjeras o Provenientes de estas. 
+CAPITULO VI NOTIFICACIONES
+ARTICULO 134.- Principio General. 
+ARTICULO 135.- Notificacion Tacita. 
+ARTICULO 136.- Notificacion Personal o por Cedula. 
+ARTICULO 137.- Medios de Notificacion. 
+ARTICULO 138.- Notificacion por Medios Digitales. Domicilio Electronico Constituido. 
+ARTICULO 139.- Contenido de la Cedula. 
+ARTICULO 140.- Firma de la Cedula..
+ARTICULO 141.- Diligenciamiento. 
+ARTICULO 142.- Entrega de la Cedula al Interesado. 
+ARTICULO 143.- Entrega de la Cedula a Personas Distintas. 
+ARTICULO 144.- Forma de la Notificacion Personal. 
+ARTICULO 145.- Notificacion por Telegrama o Carta Documentada. 
+ARTICULO 146.- Regimen de la Notificacion por Telegrama o Carta Documentada. 
+ARTICULO 147.- Notificacion por Edictos. 
+ARTICULO 148.- Publicacion de los Edictos.
+ARTICULO 149.- Formas de los Edictos. 
+ARTICULO 150.- Notificacion por Radiodifusion. 
+ARTICULO 151.- Nulidad de la Notificacion. 
+CAPITULO VII VISTAS Y TRASLADOS
+ARTICULO 152.- Plazo y carácter.
+
+CAPITULO VIII EL TIEMPO DE LOS ACTOS PROCESALES
+SECCION 1A. TIEMPO HABIL
+ARTICULO 153.- Dias y Horas Habiles. 
+ARTICULO 154.- Habilitacion Expresa.
+ARTICULO 155.- Habilitacion Tacita. 
+
+SECCION 2A. PLAZOS
+ARTICULO 156.- Caracter. 
+ARTICULO 157.- Comienzo.
+ARTICULO 158.- Suspension y Abreviacion Convencional. Declaracion de Interrupcion y Suspension.
+ARTICULO 159.- Ampliacion. 
+ARTICULO 160.- Extension a los Funcionarios Publicos.
+
+CAPITULO IX RESOLUCIONES JUDICIALES
+ARTICULO 161.- Providencias Simples. 
+ARTICULO 162.- Sentencias Interlocutorias. 
+ARTICULO 163.- Sentencias Homologatorias.
+ARTICULO 164.- Sentencia Definitiva de Primera Instancia. 
+ARTICULO 165.- Sentencia Definitiva de Segunda o Ulterior Instancia.
+ARTICULO 166.- Monto de la Condena al Pago de Frutos, Intereses, Danos y Perjuicios. 
+ARTICULO 167.- Actuacion del Juez Posterior a la Sentencia. 
+ARTICULO 168.- Demora en Pronunciar Sentencia. 
+ARTICULO 169.- Responsabilidad.
+
+CAPITULO X NULIDAD DE LOS ACTOS PROCESALES
+ARTICULO 170.- Trascendencia de la Nulidad. 
+ARTICULO 171.- Subsanacion.
+ARTICULO 172.- Inadmisibilidad.
+ARTICULO 173.- Iniciativa para la Declaracion. Requisitos.
+ARTICULO 174.- Rechazo "In Limine". 
+ARTICULO 175.- Efectos. 
+
+TITULO IV  CONTINGENCIAS GENERALES
+CAPITULO I INCIDENTES
+ARTICULO 176.- Principio General.
+ARTICULO 177.- Suspension del Proceso Principal.
+ARTICULO 178.- Formacion del Incidente. 
+ARTICULO 179.- Requisitos. 
+ARTICULO 180.- Rechazo "In Limine".
+ARTICULO 181.- Traslado y Contestacion. 
+ARTICULO 182.- Recepcion de la Prueba. 
+ARTICULO 183.- Prorroga o Suspension de la Audiencia.
+ARTICULO 184.- Prueba Pericial y Testimonial. 
+ARTICULO 185.- Cuestiones Accesorias. 
+ARTICULO 186.- Resolucion. 
+ARTICULO 187.- Tramitacion Conjunta.
+ARTICULO 188.- Incidentes en el Proceso Sumarisimo. 
+CAPITULO II ACUMULACION DE PROCESOS
+ARTICULO 189.- Procedencia. 
+ARTICULO 190.- Principio de Prevencion.
+ARTICULO 191.- Modo y Oportunidad de Disponerse.
+ARTICULO 192.- Resolucion del Incidente. 
+ARTICULO 193.- Conflicto de Acumulacion. 
+ARTICULO 194.- Suspension de Tramites. 
+ARTICULO 195.- Sentencia Unica. 
+CAPITULO III MEDIDAS CAUTELARES
+SECCION 1A. NORMAS GENERALES
+ARTICULO 196.- Oportunidad y Presupuesto.
+ARTICULO 197.- Prohibicion.
+.
+ARTICULO 198.- Inembargabilidad de los Bienes del Estado.
+ARTICULO 199.- Medida Decretada por Juez Incompetente.
+ARTICULO 200.- Tramites Previos.
+ARTICULO 201.- Cumplimiento y Recursos. 
+ARTICULO 202.- Contracautela. 
+ARTICULO 203.- Exencion de la Contracautela. 
+ARTICULO 204.- Mejora de la Contracautela. 
+ARTICULO 205.- Caracter Provisional.
+ARTICULO 206.- Modificacion.
+ARTICULO 207.- Facultades del Juez.
+ARTICULO 208.- Peligro de Perdida o Desvalorizacion.
+ARTICULO 209.- Establecimientos Industriales o Comerciales. Servicios Publicos.
+ARTICULO 210.- Caducidad.
+ARTICULO 211.- Responsabilidad. 
+SECCION 2A EMBARGO PREVENTIVO
+ARTICULO 212.- Procedencia. 
+ARTICULO 213.- Otros Casos. 
+ARTICULO 214.- Demanda por Escrituracion.
+ARTICULO 215.- Situaciones Derivadas del Proceso.
+ARTICULO 216.- Forma de la Traba. 
+ARTICULO 217.- Mandamiento. 
+ARTICULO 218.- Suspension. 
+ARTICULO 219.- Deposito. 
+ARTICULO 220.- Obligacion del Depositario.
+ARTICULO 221.- Prioridad del Primer Embargante.
+ARTICULO 222.- Bienes Inembargables.
+ARTICULO 223.- Levantamiento de Oficio y en todo Tiempo. 
+SECCION 3A. SECUESTRO
+ARTICULO 224.- Procedencia.
+
+SECCION 4A. INTERVENCION JUDICIAL
+ARTICULO 225.- Ambito.
+ARTICULO 226.- Interventor Recaudador. 
+ARTICULO 227.- Interventor Informante. 
+ARTICULO 228.- Disposiciones Comunes a Toda Clase de Intervencion. 
+ARTICULO 229.- Deberes del Interventor. Remocion.
+ARTICULO 230.- Honorarios. 
+
+SECCION 5A. INHIBICION GENERAL DE BIENES Y ANOTACION DE LITIS
+ARTICULO 231.- Inhibicion General de Bienes. 
+ARTICULO 232.- Anotacion de Litis. 
+
+SECCION 6A. PROHIBICION DE INNOVAR, PROHIBICION DE CONTRATAR
+ARTICULO 233.- Prohibicion de Innovar.
+ARTICULO 234.- Prohibicion de Contratar.
+
+SECCION 7A. MEDIDAS CAUTELARES GENERICAS Y NORMAS SUBSIDIARIAS
+ARTICULO 235.- Medidas Cautelares Genericas. 
+ARTICULO 236.- Normas Subsidiarias. 
+
+SECCION 8A. PROTECCION DE PERSONAS
+ARTICULO 237.- Procedencia.
+ARTICULO 238.- Juez Competente. 
+ARTICULO 239.- Procedimiento.
+ARTICULO 240.- Medidas Complementarias.
+
+SECCION 9A. TUTELA ANTICIPADA
+ARTICULO 241.- Procedencia. 
+ARTICULO 242.- Procedimiento. Efectos.
+ARTICULO 243.- Modificacion. Recursos. 
+
+CAPITULO IV  RECURSOS
+SECCION 1A. REPOSICION
+ARTICULO 244.- Procedencia. 
+ARTICULO 245.- Plazo y Forma. 
+ARTICULO 246.- Tramite. 
+ARTICULO 247.- Resolucion.
+ARTICULO 248.- Revocatoria "In Extremis".
+
+SECCION 2A. RECURSO DE APELACION, RECURSO DE NULIDAD
+ARTICULO 249.- Procedencia. 
+ARTICULO 250.- Formas y Efectos.
+ARTICULO 251.- Plazo. 
+ARTICULO 252.- Formas de Interposicion del Recurso.
+ARTICULO 253.- Apelacion en Relacion sin Efecto Diferido.
+ARTICULO 254.- Efecto Diferido. 
+ARTICULO 255.- Apelacion Subsidiaria. 
+ARTICULO 256.- Constitucion de Domicilio. 
+ARTICULO 257.- Efecto Devolutivo. 
+ARTICULO 258.- Remision del Expediente o Actuacion.
+ARTICULO 259.- Pago del Impuesto.
+ARTICULO 260.- Nulidad. 
+
+SECCION 3A. PROCEDIMIENTO ORDINARIO EN SEGUNDA INSTANCIA
+ARTICULO 261.- Tramite Previo. Expresion de Agravios. 
+ARTICULO 262.- Fundamentos de las Apelaciones Diferidas. Actualizacion de Cuestiones. Pedido de Apertura a Prueba. 
+ARTICULO 263.- Traslado. 
+ARTICULO 264.- Prueba y Alegatos.
+ARTICULO 265.- Produccion de la Prueba. 
+ARTICULO 266.- Informe "In Voce". 
+ARTICULO 267.- Contenido de la Expresion de Agravios. Traslado. 
+ARTICULO 268.- Desercion del Recurso. 
+ARTICULO 269.- Falta de Contestacion de la Expresion de Agravios. 
+ARTICULO 270.- Llamamiento de Autos. Sorteo de la causa.
+ARTICULO 271.- Libro de Sorteos.
+ARTICULO 272.- Estudios del Expediente. 
+ARTICULO 273.- Acuerdo. 
+ARTICULO 274.- Sentencia.
+ARTICULO 275.- Providencias de Tramite.
+ARTICULO 276.- Recurso bajo tramite Anterior. Concesion. 
+ARTICULO 277.- Apelacion en Relacion. 
+ARTICULO 278.- Examen de la Forma de Concesion del Recurso. 
+ARTICULO 279.- Poderes del Tribunal.
+ARTICULO 280.- Omisiones de la Sentencia de Primera Instancia. 
+ARTICULO 281.- Costas y Honorarios.
+ARTICULO 282.- Fallos plenarios. 
+
+SECCION 4A QUEJA POR RECURSO DENEGADO
+ARTICULO 283.- Denegacion de la Apelacion.
+ARTICULO 284.- Admisibilidad. Tramite. 
+ARTICULO 285.- Objecion Sobre el Efecto del Recurso.
+
+CAPITULO V RECURSOS EXTRAORDINARIOS
+SECCION 1A. DISPOSICIONES COMUNES CONCERNIENTES A LOS RECURSOS DE INAPLICABILIDAD; NULIDAD EXTRAORDINARIOA E INSTITUCIONALIDAD
+ARTICULO 286.- Resoluciones Susceptibles de Recursos.
+ARTICULO 287.- Plazos y Formalidades.
+ARTICULO 288.- Tramite. 
+ARTICULO 289.- Remision.
+ARTICULO 290.- Examen preliminar. 
+ARTICULO 291.- Desistimiento. 
+ARTICULO 292.- Reposicion. 
+ARTICULO 293.- La Sentencia.
+ARTICULO 294.- Efecto Suspensivo.
+ARTICULO 295.- Perdida del Deposito.
+
+SECCION 2A DISPOSICIONES ESPECIFICAS AL RECURSO DE INAPLICABILIDAD DE LEY
+ARTICULO 296.- Monto del Litigio Habilitante del Recurso.
+ARTICULO 297.- Causales. 
+ARTICULO 298.- Requisitos.
+ARTICULO 299.- Contenido de la Sentencia. 
+
+SECCION 3A. DISPOSICIONES ESPECIFICAS DEL RECURSO DE NULIDAD EXTRAORDINARIO
+
+ARTICULO 300.- Causales.
+ARTICULO 301.- Improcedencia. Remision. 
+ARTICULO 302.- Contenido de la Sentencia.
+
+SECCION 4A. RECURSO DE INCONSTITUCIONALIDAD
+ARTICULO 303.- Resoluciones Recurribles. Causales. Tramites. Remision. 
+ARTICULO 304.- Condiciones de Admisibilidad. 
+ARTICULO 305.- Contenido de la Sentencia. 
+
+TITULO V - MODOS ANORMALES DE TERMINACION DEL PROCESO
+CAPITULO I DESISTIMIENTO
+ARTICULO 306.- Desistimiento del Proceso. 
+ARTICULO 307.- Desistimiento del Derecho. 
+ARTICULO 308.- Revocacion. 
+
+CAPITULO II ALLANAMIENTO
+ARTICULO 309.- Oportunidad y Efectos.
+
+CAPITULO III TRANSACCION
+ARTICULO 310.- Forma y Tramite. 
+
+CAPITULO IV CONCILIACION
+ARTICULO 311.- Efectos. 
+
+CAPITULO V CADUCIDAD DE LA INSTANCIA
+ARTICULO 312.- Plazos. 
+ARTICULO 313.- Computo. 
+ARTICULO 314.- Litisconsorcio..
+ARTICULO 315.- Improcedencia. 
+ARTICULO 316.- Contra Quienes se Opera. 
+ARTICULO 317.- Quienes Pueden Pedir la Declaracion. Oportunidad. 
+ARTICULO 318.- Modo de Operarse.
+ARTICULO 319.- Resolucion. La resolucion sobre caducidad es apelable.
+ARTICULO 320.- Efectos de la Caducidad.	
+
+`; // ⚠️ Aquí iría TODO el texto extraído (lo he truncado por espacio, pero en tu implementación lo copias completo)
+
+    // Separamos en ítems por saltos de línea
+    const ITEMS = PDF_TEXT.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+
+    const listEl = document.getElementById('list');
+    const emptyEl = document.getElementById('empty');
+    const input = document.getElementById('filterInput');
+
+    function renderList(items){
+      listEl.innerHTML = '';
+      if(items.length === 0){
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      items.forEach(text=>{
+        const div=document.createElement('div');
+        div.className='item';
+        div.textContent=text;
+        listEl.appendChild(div);
+      });
+    }
+
+    function updateFilter(){
+      const q = input.value.toLowerCase();
+      const filtered = ITEMS.filter(line => line.toLowerCase().includes(q));
+      renderList(filtered);
+    }
+
+    input.addEventListener('input', updateFilter);
+
+    // Inicializa
+    renderList(ITEMS);
+  </script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Filtro y Print - LIBRO-1</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:#eaf3ff;
+      color:#083759;
+      display:flex;
+      justify-content:center;
+      padding:20px;
+    }
+    .app{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      max-width:900px;
+      width:100%;
+      box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .search{
+      padding:8px;
+      border:1px solid #1565C0;
+      border-radius:8px;
+      width:260px;
+    }
+    .btn{
+      background:#1565C0;
+      border:0;
+      color:white;
+      padding:8px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    .list{
+      display:grid;
+      gap:12px;
+    }
+    .item{
+      padding:12px;
+      border:1px solid #d0e5ff;
+      border-radius:8px;
+      background:#f9fcff;
+    }
+    .empty{color:#777;text-align:center;margin-top:20px}
+    @media print {
+      header, .btn, .search { display:none }
+      body{background:white}
+      .app{box-shadow:none;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <input id="filterInput" class="search" placeholder="Buscar en el documento..." />
+      <button class="btn" onclick="window.print()">Imprimir</button>
+    </header>
+    <main>
+      <div id="list" class="list"></div>
+      <div id="empty" class="empty" style="display:none">No se encontraron resultados.</div>
+    </main>
+  </div>
+
+  <script>
+    // Contenido REAL del PDF (texto plano concatenado)
+    const PDF_TEXT = `
+PARTE ESPECIAL LIBRO SEGUNDO 
+PROCESOS DE CONOCIMIENTO
+TITULO I DISPOSICIONES GENERALES
+CAPITULO I CLASES
+ARTICULO 321.- Principio General.
+ARTICULO 322.- Cuando la controversia versa sobre derechos que no son apreciables en dinero, o existen dudas sobre el valor reclamado 
+ARTICULO 323.- Proceso Sumarisimo. 
+ARTICULO 324.- Accion Meramente Declarativa.
+
+CAPITULO II DILIGENCIAS PRELIMINARES
+ARTICULO 325.- Enumeracion. Caducidad. 
+ARTICULO 326.- Tramite de la Declaracion Jurada..
+ARTICULO 327.- Tramite de la Exhibicion de Cosas e Instrumentos. 
+ARTICULO 328.- Prueba Anticipada.
+ARTICULO 330.- Produccion de Prueba Anticipada despues de Trabada la Litis. 
+ARTICULO 331.- Responsabilidad por Incumplimiento. 
+
+TITULO II PROCESO ORDINARIO
+CAPITULO I DEMANDA
+ARTICULO 332.- Forma de la Demanda.
+ARTICULO 333.- Transformacion y Ampliacion de la Demanda. 
+ARTICULO 334.- Agregacion de la Prueba Documental. Ofrecimiento de las demas Pruebas. 
+ARTICULO 335.- Hechos No Invocados en la Demanda o Contrademanda. 
+ARTICULO 336.- Documentos Posteriores o Desconocidos.
+ARTICULO 337.- Demanda y Contestacion Conjuntas. 
+ARTICULO 338.- Rechazo "In Limine".
+ARTICULO 339.- Traslado de la Demanda. 
+
+CAPITULO II CITACION DEL DEMANDADO
+ARTICULO 340.- Demandado Domiciliado o Residente en la Jurisdiccion del Juzgado.
+ARTICULO 341.- Demandado Domiciliado o Residente Fuera de la Jurisdiccion. 
+ARTICULO 342.- Provincia Demandada.
+ARTICULO 343.- Ampliacion y Fijacion de Plazo.
+ARTICULO 344.- Demandado Incierto o con Domicilio o Residencia Ignorados.
+ARTICULO 345.- Demandados con Domicilios o Residencias en Diferentes Jurisdicciones.
+ARTICULO 346.- Citacion Defectuosa. 
+
+CAPITULO III EXCEPCIONES PREVIAS
+ARTICULO 347.- Forma de Deducirlas. Plazo y Efectos.
+ARTICULO 348.- Excepciones Admisibles. 
+ARTICULO 349.- Arraigo. 
+ARTICULO 350.- Requisito de Admision. 
+ARTICULO 351.- Planteamiento de las Excepciones. Traslado. 
+ARTICULO 352.- Audiencia de Prueba. 
+ARTICULO 353.- Efectos de la Resolucion que Desestima la Excepcion de Incompetencia. 
+ARTICULO 354.- Resolucion. Recursos. 
+ARTICULO 355.- Efectos de la Admision de las Excepciones.
+ARTICULO 356.- Efectos del Rechazo de las Excepciones o de la Subsanacion de los Defectos. 
+
+CAPITULO IV CONSTESTACION A LA DEMANDA Y RECONVENCION
+ARTICULO 357.- Plazo. 
+ARTICULO 358.- Contenido y Requisitos.
+ARTICULO 386.- Negligencia.
+ARTICULO 387.- Prueba Producida y Agregada.
+ARTICULO 388.- Apreciacion de la Prueba. 
+
+SECCION 2A. PRUEBA DOCUMENTAL
+ARTICULO 389.- Exhibicion de Documentos. 
+ARTICULO 390.- Documentos en Poder de Una de las Partes.
+ARTICULO 391.- Documentos en Poder de Tercero.
+ARTICULO 392.- Cotejo. 
+ARTICULO 393.- Indicacion de Documentos Para el Cotejo. 
+ARTICULO 394.- Estado del Documento.
+ARTICULO 395.- Documentos Indubitados.
+ARTICULO 396.- Cuerpo de Escritura. 
+ARTICULO 397.- Redargucion de Falsedad.
+
+SECCION 3A. PRUEBA DE INFORMES, REQUERIMIENTO DE EXPEDIENTES
+ARTICULO 398.- Procedencia.
+ARTICULO 399.- Sustitucion o Ampliacion de Otros Medios Probatorios. 
+ARTICULO 400.- Recaudos y Plazos para la Contestacion. 
+ARTICULO 401.- Retardo. 
+ARTICULO 402.- Atribuciones de los Letrados Patrocinantes. 
+ARTICULO 403.- Compensacion. 
+ARTICULO 404.- Caducidad. 
+ARTICULO 405.- Impugnacion por Falsedad.	
+SECCION 4A. PRUEBA DE TESTIGOS
+ARTICULO 406.- Procedencia.
+ARTICULO 407.- Testigos Excluidos. 
+ARTICULO 408.- Oposicion. 
+ARTICULO 409.- Ofrecimiento.
+ARTICULO 410.- Numero de Testigos.
+ARTICULO 411.- Audiencia.
+ARTICULO 412.- Caducidad de la Prueba.
+ARTICULO 413.- Forma de la Citacion. 
+ARTICULO 414.- Carga de la Citacion.
+ARTICULO 415.- Inasistencia Justificada.
+ARTICULO 416.- Testigo Imposibilitado de Comparecer. 
+ARTICULO 417.- Incomparecencia y Falta de Interrogatorio.
+ARTICULO 418.- Pedido de Explicaciones a las Partes. 
+ARTICULO 419.- Orden de las Declaraciones. 
+ARTICULO 420.- Juramento o Promesa de Decir Verdad. 
+ARTICULO 421.- Interrogatorio Preliminar. 
+ARTICULO 422.- Forma del Examen. Acta. 
+ARTICULO 423.- Forma de las Preguntas. 
+ARTICULO 424.- Negativa a Responder.
+ARTICULO 425.- Forma de las Respuestas.
+ARTICULO 426.- Interrupcion de la Declaracion. 
+ARTICULO 427.- Permanencia.
+ARTICULO 428.- Careo. 
+ARTICULO 429.- Falso Testimonio u Otro Delito. 
+ARTICULO 430.- Suspension de la Audiencia. 
+ARTICULO 431.- Reconocimiento de Lugares. 
+ARTICULO 432.- Prueba de Oficio. 
+ARTICULO 433.- Testigos Domiciliados Fuera de la Jurisdiccion del Juzgado
+ARTICULO 435.- Excepciones a la Obligacion de Comparecer. 
+ARTICULO 436.- Idoneidad de los testigos.
+
+SECCION 5A. PRUEBA DE PERITOS
+ARTICULO 437.- Procedencia. 
+ARTICULO 438.- Perito. Consultores Tecnicos.
+ARTICULO 439.- Designacion. Puntos de Pericia.
+ARTICULO 440.- Determinacion de los Puntos de Pericia. Plazo.
+ARTICULO 441.- Reemplazo del Consultor Tecnico. Honorarios. 
+ARTICULO 442.- Acuerdo de Partes.
+ARTICULO 443.- Anticipo de Gastos.
+ARTICULO 444.- Idoneidad. 
+ARTICULO 445.- Recusacion.
+ARTICULO 446.- Causales.
+ARTICULO 447.- Tramite. Resolucion.
+ARTICULO 448.- Reemplazo. 
+ARTICULO 449.- Aceptacion del Cargo. 
+ARTICULO 450.- Remocion. 
+ARTICULO 451.- Practica de la Pericia.
+ARTICULO 452.- Presentacion del Dictamen. 
+
+ARTICULO 453.- Traslado. Explicaciones. Nueva Pericia. 
+ARTICULO 454.- Dictamen Inmediato. 
+ARTICULO 455.- Planos. Examenes Cientificos. Reconstruccion de los Hechos. 
+ARTICULO 456.- Consultas Cientificas o Tecnicas. 
+ARTICULO 457.- Eficacia Probatoria del Dictamen. 
+ARTICULO 458.- Impugnacion. Desinteres. Cargo de los Gastos y Honorarios.
+
+SECCION 6A. RECONOCIMIENTO JUDICIAL
+ARTICULO 459.- Medidas Admisibles. 
+ARTICULO 460.- Forma de la Diligencia.
+
+SECCION 7A. CONCLUSION DE LA CAUSA PARA DEFINITIVA
+ARTICULO 461.- Alternativa. 
+ARTICULO 462.- Agregacion de las Pruebas. Alegatos.
+ARTICULO 463.- Llamamiento de Autos. 
+ARTICULO 464.- Efectos del Llamamiento de Autos. 
+ARTICULO 465.- Notificacion de la Sentencia. 
+
+TITULO III PROCESO SUMARISIMO CAPITULO UNICO PROCESO SUMARISIMO
+ARTICULO 466.- Tramite.
+`; // ⚠️ Aquí iría TODO el texto extraído (lo he truncado por espacio, pero en tu implementación lo copias completo)
+
+    // Separamos en ítems por saltos de línea
+    const ITEMS = PDF_TEXT.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+
+    const listEl = document.getElementById('list');
+    const emptyEl = document.getElementById('empty');
+    const input = document.getElementById('filterInput');
+
+    function renderList(items){
+      listEl.innerHTML = '';
+      if(items.length === 0){
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      items.forEach(text=>{
+        const div=document.createElement('div');
+        div.className='item';
+        div.textContent=text;
+        listEl.appendChild(div);
+      });
+    }
+
+    function updateFilter(){
+      const q = input.value.toLowerCase();
+      const filtered = ITEMS.filter(line => line.toLowerCase().includes(q));
+      renderList(filtered);
+    }
+
+    input.addEventListener('input', updateFilter);
+
+    // Inicializa
+    renderList(ITEMS);
+  </script>
+</body>
+</html>

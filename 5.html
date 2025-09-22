@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Filtro y Print - LIBRO-1</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:#eaf3ff;
+      color:#083759;
+      display:flex;
+      justify-content:center;
+      padding:20px;
+    }
+    .app{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      max-width:900px;
+      width:100%;
+      box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .search{
+      padding:8px;
+      border:1px solid #1565C0;
+      border-radius:8px;
+      width:260px;
+    }
+    .btn{
+      background:#1565C0;
+      border:0;
+      color:white;
+      padding:8px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    .list{
+      display:grid;
+      gap:12px;
+    }
+    .item{
+      padding:12px;
+      border:1px solid #d0e5ff;
+      border-radius:8px;
+      background:#f9fcff;
+    }
+    .empty{color:#777;text-align:center;margin-top:20px}
+    @media print {
+      header, .btn, .search { display:none }
+      body{background:white}
+      .app{box-shadow:none;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <input id="filterInput" class="search" placeholder="Buscar en el documento..." />
+      <button class="btn" onclick="window.print()">Imprimir</button>
+    </header>
+    <main>
+      <div id="list" class="list"></div>
+      <div id="empty" class="empty" style="display:none">No se encontraron resultados.</div>
+    </main>
+  </div>
+
+  <script>
+    // Contenido REAL del PDF (texto plano concatenado)
+    const PDF_TEXT = `
+LIBRO QUINTO PROCESOS DE FAMILIA Y VIOLENCIA FAMILIAR
+
+TITULO I	
+CAPITULO I PRINCIPIOS GENERALES
+ARTICULO 640.- Principios. Enunciacion. 
+ARTICULO 641.- Competencia. 
+ARTICULO 642.- Principio de Subsidiariedad.
+ARTICULO 643.- Recusacion. 
+
+CAPITULO II REGLAS DE PROCEDIMIENTO
+ARTICULO 644.- Normas Generales. 
+ARTICULO 645.- Caracter de las Actuaciones. 
+ARTICULO 646.- Prueba Preconstituida..
+ARTICULO 647.- Copias de Contenido Reservado. 
+ARTICULO 648.- Tipos de Procesos.
+ARTICULO 649.- Deberes de los Jueces.
+ARTICULO 650.- Facultades. 
+ARTICULO 651.- Audiencias. 
+ARTICULO 652.- Autorizacion para Comparecer en Juicio y Ejercer Actos Juridicos. Tramite. 
+
+CAPITULO III ETAPA PREJUDICIAL DE AVENIMIENTO
+ARTICULO 653.- Comparecencia.
+
+TITUO II PROCESOS ESPECIALES
+CAPITULO I PROCESOS CON FINES DE ADOPCION
+ARTICULO 654.- Procesos de Adopcion.
+
+CAPITULO II VIOLENCIA FAMILIAR
+ARTICULO 655.- Violencia Familiar. 
+ARTICULO 656.- Procesos Especiales. 
+ARTICULO 657.- Medidas Urgentes. 
+ARTICULO 658.- Medidas Excepcionales. 
+
+CAPITULO III PROCESOS DE DECLARACION DE INCAPACIDAD Y DE INHABILITACION
+
+SECCION 1A. DECLARACION DE INCAPACIDAD
+ARTICULO 659.- Requisitos. 
+ARTICULO 660.- Medicos Especialistas.
+ARTICULO 661.- Tramite o sustanciacion.
+ARTICULO 662.- Prueba. 
+ARTICULO 663.- Medidas Precautorias. 
+ARTICULO 664.- Internacion. 
+ARTICULO 665.- Equipo Interdisciplinario.
+ARTICULO 666.- Traslado. 
+ARTICULO 667.- Sentencia.
+ARTICULO 668.- Verificacion. 
+ARTICULO 669.- Comunicacion. 
+RTICULO 670.- Notificacion.
+ARTICULO 671.- Apelacion. 
+ARTICULO 672.- Costas. 
+ARTICULO 673.- Declaracion de Sordomudez. 
+
+SECCION 2A. DECLARACION DE INHABILITACION
+ARTICULO 674.- Alcoholicos Habituales. Toxicomanos. Disminuidos. 
+ARTICULO 675.- Prodigos. 
+ARTICULO 676.- Sentencia. Limitacion de Actos.
+ARTICULO 677.- Divergencias entre el Inhabilitado y el Curador. 
+ARTICULO 678.- Proteccion de Personas.
+
+CAPITULO IV PROCESO DE RESTITUCION DE MENORES Y RESTAURACION DEL REGIMEN DE VISITAS
+ARTICULO 679.- Reglas Aplicables.
+ARTICULO 680.- Competencia. 
+ARTICULO 681.- Legitimacion. 
+ARTICULO 682.- Procedencia. 
+ARTICULO 683.- Forma de la Demanda. 
+ARTICULO 684.- Tramite. 
+ARTICULO 685.- Cumplimiento de las Resoluciones.
+ARTICULO 686.- Residencia Habitual. 
+ARTICULO 687.- Autoridad Central establecida por las Convenciones Internacionales sobre Restitucion de Menores ratificadas por el Estado Nacional. 
+ARTICULO 688.- Procedimiento. Admision. 
+ARTICULO 689.- Oposicion. Prueba. 
+ARTICULO 690.- Plazo.
+ARTICULO 691.- Recurso. 
+ARTICULO 692.- Derecho de Visita.
+ARTICULO 693.- Medidas. 
+ARTICULO 694.- Costas y Gastos. 
+ARTICULO 695.- Principio de Reciprocidad y Gratuidad. 
+
+CAPITULO V ALIMENTOS Y LITIEXPENSAS
+ARTICULO 696.- Tipo de Proceso. Recaudos. 
+ARTICULO 697.- Alimentos Provisorios.
+ARTICULO 698.- Audiencia Preliminar. 
+ARTICULO 699.- Incomparecencia Injustificada del Alimentante. Efectos.
+ARTICULO 700.- Incomparecencia Injustificada de la Parte Actora. Efectos. 
+ARTICULO 701.- Incomparecencia Justificada.
+ARTICULO 702.- Intervencion de la Parte Demandada.
+ARTICULO 703.- Sentencia.
+ARTICULO 704.- Alimentos Atrasados. 
+ARTICULO 705.- Percepcion. 
+ARTICULO 706.- Recursos. 
+ARTICULO 707.- Cumplimiento de la Sentencia. 
+ARTICULO 708.- Divorcio Decretado por Culpa de Uno o de Ambos Conyuges.
+ARTICULO 709.- Tramite Para la Modificacion y Cesacion de los Alimentos.
+ARTICULO 710.- Litisexpensas. 
+
+
+TITULO III PROCESOS VOLUNTARIOS
+CAPITULO I AUTORIZACION PARA CONTRAER MATRIMONIO
+ARTICULO 711.- Tramite. 
+ARTICULO 712.- Apelacion. 
+
+CAPITULO II TUTELA, CURATELA
+ARTICULO 713.- Tramite. 
+ARTICULO 714.- Acta.
+
+TITULO IV SEPARACION PERSONAL, DIVORCIO VINCULAR, NULIDAD DE MATRIMONIO
+ARTICULO 715.- Deber de los Jueces. 
+ARTICULO 716.- Vista. 
+`; // ⚠️ Aquí iría TODO el texto extraído (lo he truncado por espacio, pero en tu implementación lo copias completo)
+
+    // Separamos en ítems por saltos de línea
+    const ITEMS = PDF_TEXT.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+
+    const listEl = document.getElementById('list');
+    const emptyEl = document.getElementById('empty');
+    const input = document.getElementById('filterInput');
+
+    function renderList(items){
+      listEl.innerHTML = '';
+      if(items.length === 0){
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      items.forEach(text=>{
+        const div=document.createElement('div');
+        div.className='item';
+        div.textContent=text;
+        listEl.appendChild(div);
+      });
+    }
+
+    function updateFilter(){
+      const q = input.value.toLowerCase();
+      const filtered = ITEMS.filter(line => line.toLowerCase().includes(q));
+      renderList(filtered);
+    }
+
+    input.addEventListener('input', updateFilter);
+
+    // Inicializa
+    renderList(ITEMS);
+  </script>
+</body>
+</html>

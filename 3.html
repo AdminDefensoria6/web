@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Filtro y Print - LIBRO-1</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:#eaf3ff;
+      color:#083759;
+      display:flex;
+      justify-content:center;
+      padding:20px;
+    }
+    .app{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      max-width:900px;
+      width:100%;
+      box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .search{
+      padding:8px;
+      border:1px solid #1565C0;
+      border-radius:8px;
+      width:260px;
+    }
+    .btn{
+      background:#1565C0;
+      border:0;
+      color:white;
+      padding:8px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    .list{
+      display:grid;
+      gap:12px;
+    }
+    .item{
+      padding:12px;
+      border:1px solid #d0e5ff;
+      border-radius:8px;
+      background:#f9fcff;
+    }
+    .empty{color:#777;text-align:center;margin-top:20px}
+    @media print {
+      header, .btn, .search { display:none }
+      body{background:white}
+      .app{box-shadow:none;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <input id="filterInput" class="search" placeholder="Buscar en el documento..." />
+      <button class="btn" onclick="window.print()">Imprimir</button>
+    </header>
+    <main>
+      <div id="list" class="list"></div>
+      <div id="empty" class="empty" style="display:none">No se encontraron resultados.</div>
+    </main>
+  </div>
+
+  <script>
+    // Contenido REAL del PDF (texto plano concatenado)
+    const PDF_TEXT = `
+LIBRO TERCERO PROCESOS DE EJECUCION
+TITULO I EJECUCION DE SENTENCIAS
+CAPITULO I SENTENCIAS DE TRIBUNALES PROVINCIALES
+ARTICULO 467.- Resoluciones Ejecutables. 
+ARTICULO 468.- Aplicacion a Otros Titulos Ejecutables.
+ARTICULO 469.- Competencia. 
+ARTICULO 470.- Suma Liquida. Embargo. 
+ARTICULO 471.- Liquidacion. 
+ARTICULO 472.- Conformidad. Objeciones.
+ARTICULO 473.- Citacion de Venta. 
+ARTICULO 474.- Excepciones. 
+ARTICULO 475.- Prueba. 
+ARTICULO 476.- Resolucion. 
+ARTICULO 477.- Recursos. 
+ARTICULO 478.- Cumplimiento.
+ARTICULO 479.- Adecuacion de la Ejecucion. 
+ARTICULO 480.- Condena a Escriturar.
+ARTICULO 481.- Condena a Hacer. 
+ARTICULO 482.- Condena a No Hacer. 
+ARTICULO 483.- Condena a Entregar Cosas. 
+ARTICULO 484.- Liquidacion en Casos Especiales. 
+
+CAPITULO II SENTENCIAS DE TRIBUNALES EXTRANJEROS LAUDOS DE TRIBUNALES ARBITRALES EXTRANJEROS
+ARTICULO 485.- Conversion en Titulo Ejecutorio. 
+ARTICULO 486.- Competencia. Recaudos. Sustanciacion. 
+ARTICULO 487.- Eficacia de Sentencia Extranjera.
+ARTICULO 488.- Laudos de Tribunales Arbitrales Extranjeros.
+
+TITULO II JUICIO EJECUTIVO
+CAPITULO I DISPOSICIONES GENERALES
+ARTICULO 489.- Procedencia. 
+ARTICULO 490.- Opcion por Proceso de Conocimiento.
+ARTICULO 491.- Deuda Parcialmente Liquida. 
+ARTICULO 492.- Titulos Ejecutivos. 
+ARTICULO 493.- Credito por Expensas Comunes. 
+ARTICULO 494.- Preparacion de la Via Ejecutiva. 
+ARTICULO 495.- Citacion del Deudor. 
+ARTICULO 496.- Efectos del Reconocimiento de la Firma.
+ARTICULO 497.- Desconocimiento de la Firma.
+ARTICULO 498.- Caducidad de las Medidas Preparatorias. 
+ARTICULO 499.- Firma por Autorizacion o a Ruego. 
+
+CAPITULO II EMBARGO Y EXCEPCIONES
+ARTICULO 500.- Intimacion de Pago y Procedimiento Para el Embargo. 
+ARTICULO 501.- Denegacion de la Ejecucion. 
+ARTICULO 502.- Bienes en Poder de un Tercero. 
+ARTICULO 503.- Inhibicion General. 
+ARTICULO 504.- Orden de la Traba. Perjuicios.
+ARTICULO 505.- Depositario. 
+ARTICULO 506.- Deber de Informar.
+ARTICULO 507.- Embargo de Inmuebles o Muebles Registrables. 
+ARTICULO 508.- Costas. 
+ARTICULO 509.- Ampliacion Anterior a la Sentencia.
+ARTICULO 510.- Ampliacion posterior a la Sentencia. 
+ARTICULO 511.- Intimacion de Pago. Oposicion de Excepciones. 
+ARTICULO 512.- Tramites Irrenunciables. 
+ARTICULO 513.- Excepciones.
+ARTICULO 514.- Nulidad de la Ejecucion. 
+ARTICULO 515.- Subsistencia del Embargo.
+ARTICULO 516.- Tramite. 
+ARTICULO 517.- Excepciones de Puro Derecho. Falta de Prueba. 
+ARTICULO 518.- Prueba. 
+ARTICULO 519.- Sentencia. 
+ARTICULO 520.- Sentencia de Remate. 
+ARTICULO 521.- Notificacion al Defensor Oficial. 
+ARTICULO 522.- Juicio Ordinario Posterior. 
+ARTICULO 523.- Apelacion. 
+ARTICULO 524.- Efecto. Fianza.
+ARTICULO 525.- Fianza Requerida por el Ejecutado.
+ARTICULO 526.- Caracter. Plazo de las Apelaciones.
+ARTICULO 527.- Costas.
+ARTICULO 528.- Limites. Modalidades de la Ejecucion.
+
+CAPITULO III CUMPLIMIENTO DE LA SENTENCIA DE REMATE
+SECCION 1A. AMBITO, RECURSOS, DINERO EMBARGADO, LIQUIDACION, PAGO INMEDIATO, TITULOS O ACCIONES
+ARTICULO 529.- Ambito.
+ARTICULO 530.- Recursos.
+ARTICULO 531.- Embargo. Sumas de Dinero. Liquidacion. Pago Inmediato. 
+ARTICULO 532.- Adjudicacion de Titulos o Acciones. 
+
+SECCION 2A. DISPOSICIONES COMUNES A LA SUBASTA DE MUEBLES, SEMOVIENTES O INMUEBLES
+ARTICULO 533.- Martillero. Designacion. Caracter de su Actuacion. Remocion. 
+ARTICULO 534.- Deposito de los Importes Percibidos por el Martillero. Rendicion de Cuentas. 
+ARTICULO 535.- Comision. Anticipo de Fondos.
+ARTICULO 536.- Edictos. 
+ARTICULO 537.- Propaganda. Inclusion Indebida de Otros Bienes. 
+ARTICULO 538.- Preferencia para el Remate. 
+ARTICULO 539.- Subasta Progresiva. 
+ARTICULO 540.- Posturas Bajo Sobre. 
+ARTICULO 541.- Compra en Comision. 
+ARTICULO 542.- Regularidad del Acto. 
+
+SECCION 3A. SUBASTA DE MUEBLES O SEMOVIENTES
+ARTICULO 543.- Subasta de Muebles o Semovientes. 
+ARTICULO 544.- Articulaciones Infundadas. Entrega de los Bienes.
+
+SECCION 4A. SUBASTA DE INMUEBLES
+
+A) DECRETO DE LA SUBASTA
+ARTICULO 545.- Embargos Decretados por otros Juzgados. Acreedores Hipotecarios.
+ARTICULO 546.- Recaudos. 
+ARTICULO 547.- Designacion del Martillero. Lugar del Remate. 
+ARTICULO 548.- Base. Tasacion. 
+
+B) CONSTITUCION DE DOMICILIO
+ARTICULO 549.- Domicilio del Comprador.
+
+C) DEBERES Y FACULTADES DEL COMPRADOR
+ARTICULO 550.- Pago del Precio. Suspension del Plazo. 
+ARTICULO 551.- Articulaciones Infundadas del Comprador. 
+ARTICULO 552.- Pedido de Indisponibilidad de Fondos. 
+
+D) SOBRESEIMIENTO DEL JUICIO
+ARTICULO 553.- Sobreseimiento del Juicio. 
+
+E) NUEVAS SUBASTAS
+ARTICULO 554.- Nueva Subasta por Incumplimiento del Comprador. 
+ARTICULO 555.- Falta de Postores. 
+
+F) PERFECCIONAMIENTO DE LA VENTA. TRAMITES POSTERIORES. DESOCUPACION DEL INMUEBLE.
+ARTICULO 556.- Perfeccionamiento de la Venta. 
+ARTICULO 557.- Escrituracion. 
+ARTICULO 558.- Levantamiento de Medidas Precautorias. 
+ARTICULO 559.- Desocupacion del Inmueble. 
+
+SECCION 5A. PREFERENCIAS LIQUIDACION PAGO, FIANZA
+ARTICULO 560.- Preferencias. 
+ARTICULO 561.- Liquidacion. Pago. Fianza.
+
+SECCION 6A. NULIDAD DE LA SUBASTA
+ARTICULO 562.- Nulidad de la Subasta a Pedido de Parte. 
+ARTICULO 563.- Nulidad de Oficio.
+
+SECCION 7A. TEMERIDAD
+ARTICULO 564.- Temeridad. 
+
+TITULO III EJECUCIONES ESPECIALES
+CAPITULO I DISPOSICIONES GENERALES
+ARTICULO 565.- Titulos que las Autorizan. 
+ARTICULO 566.- Reglas Aplicables. 
+
+CAPITULO II DISPOSICIONES ESPECIFICAS
+
+SECCION 1A. EJECUCICON HIPOTECARIA
+ARTICULO 567.- Excepciones Admisibles.
+ARTICULO 568.- Informe Sobre Condiciones del Inmueble Hipotecado. 
+ARTICULO 569.- Tercer Poseedor. 
+
+SECCION 2A. EJECUCION PRENDARIA
+ARTICULO 570.- Prenda con Registro. 
+ARTICULO 571.- Prenda Civil. 
+
+SECCION 3A. EJECUCION COMERCIAL
+ARTICULO 572.- Procedencia. 
+ARTICULO 573.- Excepciones Admisibles. 
+
+SECCION 4A. EJECUCION FISCAL
+ARTICULO 574.- Procedencia. 
+ARTICULO 575.- Procedimiento.
+`; // ⚠️ Aquí iría TODO el texto extraído (lo he truncado por espacio, pero en tu implementación lo copias completo)
+
+    // Separamos en ítems por saltos de línea
+    const ITEMS = PDF_TEXT.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+
+    const listEl = document.getElementById('list');
+    const emptyEl = document.getElementById('empty');
+    const input = document.getElementById('filterInput');
+
+    function renderList(items){
+      listEl.innerHTML = '';
+      if(items.length === 0){
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      items.forEach(text=>{
+        const div=document.createElement('div');
+        div.className='item';
+        div.textContent=text;
+        listEl.appendChild(div);
+      });
+    }
+
+    function updateFilter(){
+      const q = input.value.toLowerCase();
+      const filtered = ITEMS.filter(line => line.toLowerCase().includes(q));
+      renderList(filtered);
+    }
+
+    input.addEventListener('input', updateFilter);
+
+    // Inicializa
+    renderList(ITEMS);
+  </script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Filtro y Print - LIBRO-1</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:#eaf3ff;
+      color:#083759;
+      display:flex;
+      justify-content:center;
+      padding:20px;
+    }
+    .app{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      max-width:900px;
+      width:100%;
+      box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .search{
+      padding:8px;
+      border:1px solid #1565C0;
+      border-radius:8px;
+      width:260px;
+    }
+    .btn{
+      background:#1565C0;
+      border:0;
+      color:white;
+      padding:8px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    .list{
+      display:grid;
+      gap:12px;
+    }
+    .item{
+      padding:12px;
+      border:1px solid #d0e5ff;
+      border-radius:8px;
+      background:#f9fcff;
+    }
+    .empty{color:#777;text-align:center;margin-top:20px}
+    @media print {
+      header, .btn, .search { display:none }
+      body{background:white}
+      .app{box-shadow:none;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <input id="filterInput" class="search" placeholder="Buscar en el documento..." />
+      <button class="btn" onclick="window.print()">Imprimir</button>
+    </header>
+    <main>
+      <div id="list" class="list"></div>
+      <div id="empty" class="empty" style="display:none">No se encontraron resultados.</div>
+    </main>
+  </div>
+
+  <script>
+    // Contenido REAL del PDF (texto plano concatenado)
+    const PDF_TEXT = `
+LIBRO CUARTO PROCESOS ESPECIALES
+TITULO I INTERDICTOS Y ACCIONES POSESORIAS DENUNCIA DE DAÑO TEMIDO REPARACIONES URGENTES
+
+CAPITULO I INTERDICTOS
+ARTICULO 576.- Clases. 
+
+CAPITULO II INTERDICTO DE ADQUIRIR
+ARTICULO 577.- Procedencia.
+ARTICULO 578.- Procedimiento.
+ARTICULO 579.- Anotacion de Litis.
+
+CAPITULO III INTERDICTO DE RETENER
+ARTICULO 580.- Procedencia. 
+ARTICULO 581.- Procedimiento.
+ARTICULO 582.- Objeto de la Prueba. 
+ARTICULO 583.- Medidas Precautorias.
+
+CAPITULO IV INTERDICTO DE RECOBRAR
+ARTICULO 584.- Procedencia. 
+ARTICULO 585.- Procedimiento. 
+ARTICULO 586.- Restitucion del Bien. 
+ARTICULO 587.- Modificacion. Ampliacion de la Demanda. 
+ARTICULO 588.- Sentencia. 
+
+CAPITULO V INTERDICTO DE OBRA NUEVA
+ARTICULO 589.- Procedencia. 
+ARTICULO 590.- Sentencia. 
+
+CAPITULO VI DISPOSICIONES COMUNES A LOS INTERDICTOS
+ARTICULO 591.- Caducidad..
+ARTICULO 592.- Juicio Posterior.
+
+CAPITULO VII ACCIONES POSESORIAS
+ARTICULO 593.- Tramite. 
+
+CAPITULO VIII DENUNCIA DE DAÑO TEMIDO OPOSICION A LA EJECUCION DE REPARACIONES URGENTES
+ARTICULO 594.- Denuncia de Dano Temido. 
+ARTICULO 595.- Oposicion a la Ejecucion de Reparaciones Urgentes. 
+
+TITULO II RENDICION DE CUENTAS
+ARTICULO 596.- Obligacion de Rendir Cuentas. 
+ARTICULO 597.- Tramite por Incidente. 
+ARTICULO 598.- Facultad Judicial.
+ARTICULO 599.- Documentacion. Justificacion de Partidas. 
+ARTICULO 600.- Saldos Reconocidos.
+ARTICULO 601.- Demanda por Aprobacion de Cuentas. 
+
+TITULO III MENSURA Y DESLINDE
+CAPITULO I MENSURA
+ARTICULO 602.- Procedencia. 
+ARTICULO 603.- Alcance.
+ARTICULO 604.- Requisitos de la Solicitud.
+ARTICULO 605.- Nombramiento del Perito. Edictos. 
+ARTICULO 606.- Actuacion Preliminar del Perito. 
+ARTICULO 607.- Oposiciones. 
+ARTICULO 608.- Oportunidad de la Mensura. 
+ARTICULO 609.- Continuacion de la Diligencia.
+ARTICULO 610.- Citacion a Otros Linderos. 
+ARTICULO 611.- Intervencion de los Interesados. 
+
+ARTICULO 612.- Remocion de Mojones.
+ARTICULO 613.- Acta. Tramite Posterior.
+ARTICULO 614.- Dictamen Tecnico Administrativo. 
+ARTICULO 615.- Efectos. 
+ARTICULO 616.- Defectos Tecnicos. 
+
+CAPITULO II DESLINDE
+ARTICULO 617.- Deslinde por Convenio. 
+ARTICULO 618.- Deslinde Judicial.
+ARTICULO 619.- Ejecucion de la Sentencia que dispone el Deslinde. 
+
+TITULO IV DIVISION DE COSAS COMUNES
+ARTICULO 620.- Tramite.
+ARTICULO 621.- Peritos. 
+ARTICULO 622.- Division Extrajudicial. 
+
+TITULO V DESALOJO
+ARTICULO 623.- Procedimiento. 
+ARTICULO 624.- Procedencia. 
+ARTICULO 625.- Entrega de Inmueble al Accionante. 
+ARTICULO 626.- Reconocimiento Judicial.
+ARTICULO 627.- Desocupacion Inmediata.
+ARTICULO 628.- Denuncia de la Existencia de Sublocatarios u Ocupantes. 
+ARTICULO 629.- Notificaciones. 
+ARTICULO 630.- Localizacion del Inmueble. 
+ARTICULO 631.- Deberes y Facultades del Notificador. 
+ARTICULO 632.- Prueba. 
+ARTICULO 633.- Lanzamiento. 
+ARTICULO 634.- Alcance de la Sentencia.
+ARTICULO 635.- Condena de Futuro. 
+
+TITULO VI PROCESOS URGENTES MEDIDAS AUTOSATISFACTIVAS 
+CAPITULO I DISPOSICIONES GENERALES
+ARTICULO 636.- Procedencia.
+ARTICULO 637.- Tramite. 
+ARTICULO 638.- Recursos.
+ARTICULO 639.- Suspension Provisoria.
+`; // ⚠️ Aquí iría TODO el texto extraído (lo he truncado por espacio, pero en tu implementación lo copias completo)
+
+    // Separamos en ítems por saltos de línea
+    const ITEMS = PDF_TEXT.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+
+    const listEl = document.getElementById('list');
+    const emptyEl = document.getElementById('empty');
+    const input = document.getElementById('filterInput');
+
+    function renderList(items){
+      listEl.innerHTML = '';
+      if(items.length === 0){
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      items.forEach(text=>{
+        const div=document.createElement('div');
+        div.className='item';
+        div.textContent=text;
+        listEl.appendChild(div);
+      });
+    }
+
+    function updateFilter(){
+      const q = input.value.toLowerCase();
+      const filtered = ITEMS.filter(line => line.toLowerCase().includes(q));
+      renderList(filtered);
+    }
+
+    input.addEventListener('input', updateFilter);
+
+    // Inicializa
+    renderList(ITEMS);
+  </script>
+</body>
+</html>

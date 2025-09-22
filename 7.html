@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Filtro y Print - LIBRO-1</title>
+  <style>
+    body{
+      margin:0;
+      font-family:Arial,Helvetica,sans-serif;
+      background:#eaf3ff;
+      color:#083759;
+      display:flex;
+      justify-content:center;
+      padding:20px;
+    }
+    .app{
+      background:white;
+      padding:20px;
+      border-radius:10px;
+      max-width:900px;
+      width:100%;
+      box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .search{
+      padding:8px;
+      border:1px solid #1565C0;
+      border-radius:8px;
+      width:260px;
+    }
+    .btn{
+      background:#1565C0;
+      border:0;
+      color:white;
+      padding:8px 12px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    .list{
+      display:grid;
+      gap:12px;
+    }
+    .item{
+      padding:12px;
+      border:1px solid #d0e5ff;
+      border-radius:8px;
+      background:#f9fcff;
+    }
+    .empty{color:#777;text-align:center;margin-top:20px}
+    @media print {
+      header, .btn, .search { display:none }
+      body{background:white}
+      .app{box-shadow:none;padding:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <input id="filterInput" class="search" placeholder="Buscar en el documento..." />
+      <button class="btn" onclick="window.print()">Imprimir</button>
+    </header>
+    <main>
+      <div id="list" class="list"></div>
+      <div id="empty" class="empty" style="display:none">No se encontraron resultados.</div>
+    </main>
+  </div>
+
+  <script>
+    // Contenido REAL del PDF (texto plano concatenado)
+    const PDF_TEXT = `
+LIBRO SEPTIMO PROCESO ARBITRAL
+TITULO I JUICIO ARBITRAL
+ARTICULO 764.- Objeto del Juicio. 
+ARTICULO 765.- Cuestiones Excluidas.
+ARTICULO 766.- Capacidad. 
+ARTICULO 767.- Forma del Compromiso. 
+ARTICULO 768.- Contenido. 
+ARTICULO 769.- Clausulas Facultativas. 
+ARTICULO 770.- Demanda.
+ARTICULO 771.- Nombramiento. 
+ARTICULO 772.- Aceptacion del Cargo. 
+ARTICULO 773.- Desempeno de los Arbitros.
+ARTICULO 774.- Recusacion.
+ARTICULO 775.- Tramite de la Recusacion. 
+ARTICULO 776.- Extincion del Compromiso. 
+ARTICULO 777.- Secretario.
+ARTICULO 778.- Actuacion del Tribunal. 
+ARTICULO 779.- Procedimiento.
+ARTICULO 780.- Cuestiones Previas. 
+ARTICULO 781.- Medida de Ejecucion. 
+ARTICULO 782.- Contenido del Laudo. 
+ARTICULO 783.- Plazo. 
+ARTICULO 784.- Responsabilidad de los Arbitros. 
+ARTICULO 785.- Mayoria. 
+ARTICULO 786.- Recursos.
+ARTICULO 787.- Interposicion.
+ARTICULO 788.- Renuncia de Recursos. Aclaratoria. Nulidad. 
+ARTICULO 789.- Laudo Nulo. 
+ARTICULO 790.- Pago de la Multa. 
+ARTICULO 791.- Recursos.
+ARTICULO 792.- Pleito Pendiente.
+ARTICULO 793.- Jueces y Funcionarios.
+
+TITULO II JUICIO DE AMIGABLES COMPONEDORES
+ARTICULO 794.- Objeto. Clase de Arbitraje. 
+ARTICULO 795.- Normas Comunes. 
+ARTICULO 796.- Recusaciones. 
+ARTICULO 797.- Procedimiento. Caracter de la Actuacion.
+ARTICULO 798.- Plazo. 
+ARTICULO 799.- Nulidad. 
+ARTICULO 800.- Costas. Honorarios.
+
+TITULO III PERICIA ARBITRAL
+ARTICULO 801.- Regimen. 
+`; // ⚠️ Aquí iría TODO el texto extraído (lo he truncado por espacio, pero en tu implementación lo copias completo)
+
+    // Separamos en ítems por saltos de línea
+    const ITEMS = PDF_TEXT.split("\n").map(t => t.trim()).filter(t => t.length > 0);
+
+    const listEl = document.getElementById('list');
+    const emptyEl = document.getElementById('empty');
+    const input = document.getElementById('filterInput');
+
+    function renderList(items){
+      listEl.innerHTML = '';
+      if(items.length === 0){
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+      items.forEach(text=>{
+        const div=document.createElement('div');
+        div.className='item';
+        div.textContent=text;
+        listEl.appendChild(div);
+      });
+    }
+
+    function updateFilter(){
+      const q = input.value.toLowerCase();
+      const filtered = ITEMS.filter(line => line.toLowerCase().includes(q));
+      renderList(filtered);
+    }
+
+    input.addEventListener('input', updateFilter);
+
+    // Inicializa
+    renderList(ITEMS);
+  </script>
+</body>
+</html>
